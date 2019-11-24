@@ -3,4 +3,6 @@
     <string name="bluetooth_disabled">Bluetooth Disabled</string>
     <string name="enable_bluetooth">Enable bluetooth</string>
     <string name="bluetooth_devices">Bluetooth devices</string>
+    <string name="close_connection">Close Connection</string>
+    <string name="try_with_pin">Try with PIN</string>
 </resources>

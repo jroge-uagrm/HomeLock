@@ -10,10 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -53,6 +51,7 @@ public class EnableView extends AppCompatActivity {
         }
         startActivity(intent);
     }
+
     private boolean existAMACSaved() {
         try {
             BufferedReader bufferedReader = new BufferedReader(
@@ -93,6 +92,11 @@ public class EnableView extends AppCompatActivity {
             }
         }
     };
+    @Override
+    public void onBackPressed() {
+        //Nothing
+    }
+
     /*private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
         *//*Enabling discoverability*//*
         @Override
