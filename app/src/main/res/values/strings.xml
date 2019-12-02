@@ -5,4 +5,5 @@
     <string name="bluetooth_devices">Bluetooth devices</string>
     <string name="close_connection">Close Connection</string>
     <string name="try_with_pin">Try with PIN</string>
+    <string name="change_password">Change password</string>
 </resources>
