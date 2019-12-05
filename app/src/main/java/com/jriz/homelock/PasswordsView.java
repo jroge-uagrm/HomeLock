@@ -241,7 +241,8 @@ public class PasswordsView extends AppCompatActivity {
             btSocket.connect();
             connect();
         } catch (IOException e) {
-            Intent i = new Intent(this, ConnectionView.class);
+            Intent i = new Intent(this, NotConnectedView.class);
+            i.putExtra(ConnectionView.EXTRA_DEVICE_ADDRESS,address);
             startActivity(i);
         }
     }

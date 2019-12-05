@@ -6,4 +6,7 @@
     <string name="close_connection">Close Connection</string>
     <string name="try_with_pin">Try with PIN</string>
     <string name="change_password">Change password</string>
+    <string name="not_connected">NOT CONNECTED</string>
+    <string name="disconnect_device">Disconnect device</string>
+    <string name="try_to_connect">Try to connect</string>
 </resources>

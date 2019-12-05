@@ -42,28 +42,9 @@ public class EnableView extends AppCompatActivity {
             }
         });
     }
-    private void verifyMAC(){
-        Intent intent;
-        if (existAMACSaved()) {
-            intent = new Intent(this, PasswordsView.class);
-        } else {
-            intent = new Intent(this, ConnectionView.class);
-        }
+    private void verifyMac(){
+        Intent intent=new Intent(this,MainActivity.class);
         startActivity(intent);
-    }
-
-    private boolean existAMACSaved() {
-        try {
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(
-                            openFileInput("myMAC.txt")
-                    )
-            );
-            String MACSaved = bufferedReader.readLine();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
@@ -81,7 +62,7 @@ public class EnableView extends AppCompatActivity {
                         break;
                     case BluetoothAdapter.STATE_ON:
 //                        Toast.makeText(context, "Bluetooth enabled", Toast.LENGTH_SHORT).show();
-                        verifyMAC();
+                        verifyMac();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
 //                        Toast.makeText(context, "Enabling bluetooth...", Toast.LENGTH_SHORT).show();
