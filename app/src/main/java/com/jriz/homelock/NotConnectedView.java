@@ -7,8 +7,11 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -83,10 +86,11 @@ public class NotConnectedView extends AppCompatActivity {
         tryToConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(NotConnectedView.this, "Connecting...", Toast.LENGTH_SHORT).show();
                 onResume();
             }
         });
+        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver2, BTIntent);
     }
     private void deleteMAC() {
         SQLiteDatabase myDB =
@@ -133,7 +137,13 @@ public class NotConnectedView extends AppCompatActivity {
         try {
             btSocket = createBluetoothSocket(device);
             btSocket.connect();
-            connect();
+            if(connect()){
+                btSocket.close();
+                Intent i= new Intent(this, PasswordsView.class);
+                i.putExtra(ConnectionView.EXTRA_DEVICE_ADDRESS,address);
+                i.putExtra("rol","show");
+                startActivity(i);
+            }btSocket.close();
         } catch (IOException e) {
             Toast.makeText(this, "Not Found", Toast.LENGTH_SHORT).show();
             /*Intent i = new Intent(this, NotConnectedView.class);
@@ -143,27 +153,32 @@ public class NotConnectedView extends AppCompatActivity {
     }
 
     @SuppressLint("HandlerLeak")
-    private void connect() {
-        myConnectionBT = new ConnectedThread(
-                btSocket,
-                new Handler() {
-                    public void handleMessage(android.os.Message msg) {
-                        if (msg.what == handlerState) {
-                            String readMessage = (String) msg.obj;
-                            DataStringIN.append(readMessage);
-                            int endOfLineIndex = DataStringIN.indexOf("#");
-                            if (endOfLineIndex > 0) {
-                                String dataInPrint = DataStringIN.substring(0, endOfLineIndex);
-                                DataStringIN.delete(0, DataStringIN.length());
-                                Toast.makeText(NotConnectedView.this, dataInPrint, Toast.LENGTH_SHORT).show();
+    private boolean connect() {
+        try {
+            myConnectionBT = new ConnectedThread(
+                    btSocket,
+                    new Handler() {
+                        public void handleMessage(android.os.Message msg) {
+                            if (msg.what == handlerState) {
+                                String readMessage = (String) msg.obj;
+                                DataStringIN.append(readMessage);
+                                int endOfLineIndex = DataStringIN.indexOf("#");
+                                if (endOfLineIndex > 0) {
+                                    String dataInPrint = DataStringIN.substring(0, endOfLineIndex);
+                                    DataStringIN.delete(0, DataStringIN.length());
+                                    Toast.makeText(NotConnectedView.this, dataInPrint, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(NotConnectedView.this, "ALGO PASA", Toast.LENGTH_SHORT).show();
                             }
-                        } else {
-                            Toast.makeText(NotConnectedView.this, "ALGO PASA", Toast.LENGTH_SHORT).show();
                         }
                     }
-                }
-                , handlerState);
-        myConnectionBT.start();
+                    , handlerState);
+            myConnectionBT.start();
+            return true;
+        }catch(Exception e){
+            return  false;
+        }
     }
 
     @Override
@@ -178,4 +193,35 @@ public class NotConnectedView extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {/*Nothing*/}
+
+    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
+        //*Enabling discoverability*//*
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                switch (mode) {
+                    //Device is in Discoverable Mode
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Enabled.", Toast.LENGTH_SHORT).show();
+                        break;
+                    //Device not in discoverable mode
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Disabled. Able to receive connections.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_NONE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Disabled. Not able to receive connections.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTING:
+                        Toast.makeText(context, "mBroadcastReceiver2: Connecting....", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTED:
+//                        Log.d(TAG, "mBroadcastReceiver2: Connected.");
+                        Toast.makeText(context, "CONECTADO", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }
+    };
 }

@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -200,7 +202,7 @@ public class PasswordsView extends AppCompatActivity {
         SQLiteDatabase myDB =
                 openOrCreateDatabase("my.db", MODE_PRIVATE, null);
         myDB.execSQL(
-                "UPDATE user SET pin='"+newPin+"' WHERE id=1"
+                "UPDATE user SET pin='" + newPin + "' WHERE id=1"
         );
         myDB.close();
     }
@@ -240,9 +242,12 @@ public class PasswordsView extends AppCompatActivity {
             btSocket = createBluetoothSocket(device);
             btSocket.connect();
             connect();
+            //btnTryWithPin.setEnabled(true);
         } catch (IOException e) {
+            //btnTryWithPin.setEnabled(false);
+            //Toast.makeText(this, "Not connected", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, NotConnectedView.class);
-            i.putExtra(ConnectionView.EXTRA_DEVICE_ADDRESS,address);
+            i.putExtra(ConnectionView.EXTRA_DEVICE_ADDRESS, address);
             startActivity(i);
         }
     }
@@ -283,4 +288,35 @@ public class PasswordsView extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {/*Nothing*/}
+
+    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
+        //*Enabling discoverability*//*
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                switch (mode) {
+                    //Device is in Discoverable Mode
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Enabled.", Toast.LENGTH_SHORT).show();
+                        break;
+                    //Device not in discoverable mode
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Disabled. Able to receive connections.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_NONE:
+                        Toast.makeText(context, "mBroadcastReceiver2: Discoverability Disabled. Not able to receive connections.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTING:
+                        Toast.makeText(context, "mBroadcastReceiver2: Connecting....", Toast.LENGTH_SHORT).show();
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTED:
+//                        Log.d(TAG, "mBroadcastReceiver2: Connected.");
+                        Toast.makeText(context, "CONNECTED", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }
+    };
 }
